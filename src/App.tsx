@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
 
 function App() {
@@ -12,33 +12,100 @@ function App() {
     { id: 7, name: "鈴木七郎", role: "student", email: "test7@happiness.com", age: 24, postCode: "300-0008", phone: "0120000007", hobbies: ["筋トレ", "ダーツ"], url: "https://ggg.com", studyMinutes: 26900, taskCode: 401, studyLangs: ["PHP", "Rails"], score: 73 },
     { id: 8, name: "鈴木八郎", role: "mentor", email: "test8@happiness.com", age: 33, postCode: "100-0009", phone: "0120000008", hobbies: ["ランニング", "旅行"], url: "https://hhh.com", experienceDays: 6000, useLangs: ["Golang", "Rails"], availableStartCode: 301, availableEndCode: 505 },
   ]
+  const [activeTab, setActiveTab] = useState('all');
+  const filteredUsers = USER_LIST.filter(user => {
+    if (activeTab === 'all') return true; // 全員を表示
+    if (activeTab === 'student') return user.role === 'student'; // 生徒のみを表示
+    if (activeTab === 'mentor') return user.role === 'mentor'; // メンターのみを表示
+    return false;
+  });
+
   return (
     <div className="App bg-gray-100 p-5">
       <div className="container mx-auto bg-white shadow-lg rounded-lg overflow-hidden p-5">
+      <div className="flex mb-4">
+          <button
+            className={`flex-1 py-2 px-4 text-center ${activeTab === 'all' ? 'bg-gray-200' : ''}`}
+            onClick={() => setActiveTab('all')}
+          >
+            全員
+          </button>
+          <button
+            className={`flex-1 py-2 px-4 text-center ${activeTab === 'student' ? 'bg-gray-200' : ''}`}
+            onClick={() => setActiveTab('student')}
+          >
+            生徒のみ
+          </button>
+          <button
+            className={`flex-1 py-2 px-4 text-center ${activeTab === 'mentor' ? 'bg-gray-200' : ''}`}
+            onClick={() => setActiveTab('mentor')}
+          >
+            メンターのみ
+          </button>
+        </div>        
         <table className="table-auto w-full">
           <thead className="bg-gray-200">
             <tr>
-              <th className="border border-gray-300 px-4 py-2 text-gray-600">名前</th>
-              <th className="border border-gray-300 px-4 py-2 text-gray-600">ロール</th>
-              <th className="border border-gray-300 px-4 py-2 text-gray-600">メールアドレス</th>
-              <th className="border border-gray-300 px-4 py-2 text-gray-600">年齢</th>
-              <th className="border border-gray-300 px-4 py-2 text-gray-600">郵便番号</th>
-              <th className="border border-gray-300 px-4 py-2 text-gray-600">電話番号</th>
-              <th className="border border-gray-300 px-4 py-2 text-gray-600">趣味</th>
-              <th className="border border-gray-300 px-4 py-2 text-gray-600">URL</th>
+              <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">名前</th>
+              <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">ロール</th>
+              <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">メールアドレス</th>
+              <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">年齢</th>
+              <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">郵便番号</th>
+              <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">電話番号</th>
+              <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">趣味</th>
+              <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">URL</th> 
+              {activeTab !== 'student' && (
+                <>
+                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">実務経験月数</th>
+                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">現場で使っている言語</th>
+                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">担当できる課題番号初め</th>
+                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">担当できる課題番号終わり</th>
+                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">対応可能な生徒</th>
+              </>
+              )}
+              {activeTab !== 'mentor' && (
+                <>
+                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">勉強時間</th>
+                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">課題番号</th>
+                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">勉強中の言語</th>
+                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">ハピネススコア</th>
+                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">対応可能なメンター</th>
+              </>
+
+              )}
             </tr>
           </thead>
           <tbody>
-            {USER_LIST.map(user => (
+            {filteredUsers.map(user => (
               <tr key={user.id}>
-                <td className="border border-gray-300 px-4 py-2">{user.name}</td>
-                <td className="border border-gray-300 px-4 py-2">{user.role === 'mentor' ? '卒業生' : '在校生'}</td>
-                <td className="border border-gray-300 px-4 py-2">{user.email}</td>
-                <td className="border border-gray-300 px-4 py-2">{user.age}</td>
-                <td className="border border-gray-300 px-4 py-2">{user.postCode}</td>
-                <td className="border border-gray-300 px-4 py-2">{user.phone}</td>
-                <td className="border border-gray-300 px-4 py-2">{user.hobbies.join(', ')}</td>
-                <td className="border border-gray-300 px-4 py-2"><a href={user.url} target="_blank" rel="noopener noreferrer">Link</a></td>
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.name}</td>
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.role === 'mentor' ? '卒業生' : '在校生'}</td>
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.email}</td>
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.age}</td>
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.postCode}</td>
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.phone}</td>
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.hobbies.join(', ')}</td>
+                <td className="border border-gray-300 px-4 py-2 text-xs"><a href={user.url} target="_blank" rel="noopener noreferrer">Link</a></td>
+                {activeTab !== 'student' && (
+                  <>
+                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.experienceDays}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.useLangs}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableStartCode}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableEndCode}</td>
+                  {/* 対応可能な生徒<*/}
+                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableEndCode}</td> 
+                </>
+                )}
+                {activeTab !== 'mentor' && (
+                  <>
+                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.studyMinutes}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.taskCode}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.studyLangs}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.score}</td>
+                  {/* 対応可能なメンター */}
+                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.score}</td> 
+                </>
+                )}
               </tr>
             ))}
           </tbody>
