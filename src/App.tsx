@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 
 function App() {
+
   const USER_LIST : (Student | Mentor)[]= [
     { id: 1, name: "鈴木太郎", role: "student", email: "test1@happiness.com", age: 26, postCode: "100-0003", phone: "0120000001", hobbies: ["旅行", "食べ歩き", "サーフィン"], url: "https://aaa.com", studyMinutes: 3000, taskCode: 101, studyLangs: ["Rails", "Javascript"], score: 68 },
     { id: 2, name: "鈴木二郎", role: "mentor", email: "test2@happiness.com", age: 31, postCode: "100-0005", phone: "0120000002", hobbies: ["サッカー", "ランニング", "筋トレ"], url: "https://bbb.com", experienceDays: 1850, useLangs: ["Next.js", "GoLang"], availableStartCode: 201, availableEndCode: 302 },
@@ -45,8 +46,38 @@ function App() {
 
   const filteredUsers: User[] = USER_LIST.filter(user => {
     if (activeTab === 'all') return true;
-    return user.role === activeTab; // 'student'または'mentor'と比較
+    return user.role === activeTab;
   });
+
+  function findAvailableMentors(student: Student): Mentor[] {
+    const availableMentors: Mentor[] = [];
+    const isMentor = (user: User): user is Mentor => user.role === 'mentor';
+  
+    USER_LIST.forEach((user: User) => {
+      if (isMentor(user)) {
+        if (user.availableStartCode <= student.taskCode && user.availableEndCode >= student.taskCode) {
+          availableMentors.push(user);
+        }
+      }
+    });
+  
+    return availableMentors;
+  }
+
+  function findAvailableStudents(mentors: Mentor): Student[] {
+    const availableStudents: Student[] = [];
+    const isStudent = (user: User): user is Student => user.role === 'student';
+  
+    USER_LIST.forEach((user: User) => {
+      if (isStudent(user)) {
+        if (mentors.availableStartCode <= user.taskCode && mentors.availableEndCode >= user.taskCode) {
+          availableStudents.push(user);
+        }
+      }
+    });
+  
+    return availableStudents;
+  }  
 
   // const [sortedUsers, setSortedUsers] = useState<Student[]>(sortByStudyMinutes(USER_LIST));
   // function sortByStudyMinutes(students : Student[]) :  Student[]{
@@ -56,7 +87,7 @@ function App() {
   return (
     <div className="App bg-gray-100 p-5">
       <div className="container mx-auto bg-white shadow-lg rounded-lg overflow-hidden p-5">
-      <div className="flex mb-4">
+        <div className="flex mb-4">
           <button
             className={`flex-1 py-2 px-4 text-center ${activeTab === 'all' ? 'bg-gray-200' : ''}`}
             onClick={() => setActiveTab('all')}
@@ -144,67 +175,69 @@ function App() {
             </tr>
           </thead>
           <tbody>
-        {filteredUsers.map((user: User) => {
-          // Student型の場合のプロパティ
-          const isStudent = (user: User): user is Student => user.role === 'student';
-          // Mentor型の場合のプロパティ
-          const isMentor = (user: User): user is Mentor => user.role === 'mentor';
-
-        return (
-          <tr key={user.id}>
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.name}</td>
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.role === 'mentor' ? '卒業生' : '在校生'}</td>
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.email}</td>
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.age}</td>
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.postCode}</td>
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.phone}</td>
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.hobbies.join(', ')}</td>
-                <td className="border border-gray-300 px-4 py-2 text-xs"><a href={user.url} target="_blank" rel="noopener noreferrer">Link</a></td>
-              {isStudent(user) && (
-              <>
-                {/* 生徒固有のデータ */}
-                {activeTab === 'all' && (
-                  <>
-                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
-                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
-                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
-                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
-                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
-                  </>
-                )}
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.studyMinutes}</td>
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.taskCode}</td>
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.studyLangs.join(', ')}</td>
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.score}</td>
-                {/* 対応可能なメンターは未実装 */}
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.studyMinutes}</td>
-              </>
-            )}
-            {isMentor(user) && (              
-              <>
-                {/* メンター固有のデータ */}
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.experienceDays}</td>
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.useLangs.join(', ')}</td>
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableStartCode}</td>
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableEndCode}</td>
-                {/* 対応可能な生徒は未実装 */}
-                <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableEndCode}</td>
-                {activeTab === 'all' && (
-                  <>
-                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
-                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
-                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
-                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
-                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
-                  </>
-                )}
-              </>
-            )}
-
-          </tr>
-        );
-      })}
-    </tbody>
+            {filteredUsers.map((user: User) => {
+              // Student型の場合のプロパティ
+              const isStudent = (user: User): user is Student => user.role === 'student';
+              // Mentor型の場合のプロパティ
+              const isMentor = (user: User): user is Mentor => user.role === 'mentor';
+              return (
+                <tr key={user.id}>
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.name}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.role === 'mentor' ? '卒業生' : '在校生'}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.email}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.age}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.postCode}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.phone}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.hobbies.join(', ')}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-xs"><a href={user.url} target="_blank" rel="noopener noreferrer">Link</a></td>
+                    {isStudent(user) && (
+                    <>
+                      {/* 生徒固有のデータ */}
+                      {activeTab === 'all' && (
+                        <>
+                          <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                          <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                          <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                          <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                          <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                        </>
+                      )}
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.studyMinutes}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.taskCode}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.studyLangs.join(', ')}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.score}</td>
+                      {/* 対応可能なメンター */}
+                      <td className="border border-gray-300 px-4 py-2 text-xs">
+                        {findAvailableMentors(user).map(mentor => mentor.name).join(', ')}
+                      </td>
+                    </>
+                  )}
+                  {isMentor(user) && (              
+                    <>
+                      {/* メンター固有のデータ */}
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.experienceDays}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.useLangs.join(', ')}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableStartCode}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableEndCode}</td>
+                      {/* 対応可能な生徒は未実装 */}
+                      <td className="border border-gray-300 px-4 py-2 text-xs">
+                        {findAvailableStudents(user).map(student => student.name).join(', ')}
+                      </td>
+                      {activeTab === 'all' && (
+                        <>
+                          <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                          <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                          <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                          <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                          <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                        </>
+                      )}
+                    </>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
         </table>
       </div>
     </div>
