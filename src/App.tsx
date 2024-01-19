@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 
 function App() {
-  const USER_LIST = [
+  const USER_LIST : (Student | Mentor)[]= [
     { id: 1, name: "鈴木太郎", role: "student", email: "test1@happiness.com", age: 26, postCode: "100-0003", phone: "0120000001", hobbies: ["旅行", "食べ歩き", "サーフィン"], url: "https://aaa.com", studyMinutes: 3000, taskCode: 101, studyLangs: ["Rails", "Javascript"], score: 68 },
     { id: 2, name: "鈴木二郎", role: "mentor", email: "test2@happiness.com", age: 31, postCode: "100-0005", phone: "0120000002", hobbies: ["サッカー", "ランニング", "筋トレ"], url: "https://bbb.com", experienceDays: 1850, useLangs: ["Next.js", "GoLang"], availableStartCode: 201, availableEndCode: 302 },
     { id: 3, name: "鈴木三郎", role: "student", email: "test3@happiness.com", age: 23, postCode: "300-0332", phone: "0120000003", hobbies: ["アニメ", "ゲーム", "旅行"], url: "https://ccc.com", studyMinutes: 125000, taskCode: 204, studyLangs: ["Rails", "Next.js"], score: 90 },
@@ -12,13 +12,46 @@ function App() {
     { id: 7, name: "鈴木七郎", role: "student", email: "test7@happiness.com", age: 24, postCode: "300-0008", phone: "0120000007", hobbies: ["筋トレ", "ダーツ"], url: "https://ggg.com", studyMinutes: 26900, taskCode: 401, studyLangs: ["PHP", "Rails"], score: 73 },
     { id: 8, name: "鈴木八郎", role: "mentor", email: "test8@happiness.com", age: 33, postCode: "100-0009", phone: "0120000008", hobbies: ["ランニング", "旅行"], url: "https://hhh.com", experienceDays: 6000, useLangs: ["Golang", "Rails"], availableStartCode: 301, availableEndCode: 505 },
   ]
-  const [activeTab, setActiveTab] = useState('all');
-  const filteredUsers = USER_LIST.filter(user => {
-    if (activeTab === 'all') return true; // 全員を表示
-    if (activeTab === 'student') return user.role === 'student'; // 生徒のみを表示
-    if (activeTab === 'mentor') return user.role === 'mentor'; // メンターのみを表示
-    return false;
+
+  type ActiveTabType = 'all' | 'student' | 'mentor';
+  const [activeTab, setActiveTab] = useState<ActiveTabType>('all');
+  interface User {
+    id: number;
+    name: string;
+    role: 'student' | 'mentor';
+    email: string;
+    age: number;
+    postCode: string;
+    phone: string;
+    hobbies: string[];
+    url: string;
+  }
+
+  interface Student extends User {
+    role: 'student';
+    studyMinutes: number;
+    taskCode: number;
+    studyLangs: string[];
+    score: number;
+  }
+  
+  interface Mentor extends User {
+    role: 'mentor';
+    experienceDays: number;
+    useLangs: string[];
+    availableStartCode: number;
+    availableEndCode: number;
+  }
+
+  const filteredUsers: User[] = USER_LIST.filter(user => {
+    if (activeTab === 'all') return true;
+    return user.role === activeTab; // 'student'または'mentor'と比較
   });
+
+  // const [sortedUsers, setSortedUsers] = useState<Student[]>(sortByStudyMinutes(USER_LIST));
+  // function sortByStudyMinutes(students : Student[]) :  Student[]{
+  //   return students.slice().sort((a, b) => a.studyMinutes - b.studyMinutes);
+  // }
 
   return (
     <div className="App bg-gray-100 p-5">
@@ -56,7 +89,19 @@ function App() {
               <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">URL</th> 
               {activeTab !== 'student' && (
                 <>
-                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">実務経験月数</th>
+                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">
+                <div className="flex">
+                    <div>
+                    実務経験月数
+                    </div>
+                    {activeTab === 'mentor' && (
+                    <div>
+                      <i className="bi bi-sort-up"></i>
+                      <i className="bi bi-sort-down-alt"></i>
+                    </div>
+                    )}               
+                  </div>
+                </th>
                 <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">現場で使っている言語</th>
                 <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">担当できる課題番号初め</th>
                 <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">担当できる課題番号終わり</th>
@@ -65,19 +110,48 @@ function App() {
               )}
               {activeTab !== 'mentor' && (
                 <>
-                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">勉強時間</th>
+                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">
+                  <div className="flex">
+                    <div>
+                      勉強時間
+                    </div>
+                    {activeTab === 'student' && (
+                    <div>
+                      <i className="bi bi-sort-up"></i>
+                      <i className="bi bi-sort-down-alt"></i>
+                    </div>
+                    )}
+                  </div>
+                </th>
                 <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">課題番号</th>
                 <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">勉強中の言語</th>
-                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">ハピネススコア</th>
+                <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">
+                <div className="flex">
+                    <div>
+                    ハピネススコア
+                    </div>
+                    {activeTab === 'student' && (
+                    <div>
+                      <i className="bi bi-sort-up"></i>
+                      <i className="bi bi-sort-down-alt"></i>
+                    </div>
+                    )}               
+                  </div>
+                </th>
                 <th className="border border-gray-300 px-4 py-2  text-gray-600 text-xs">対応可能なメンター</th>
               </>
-
               )}
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map(user => (
-              <tr key={user.id}>
+        {filteredUsers.map((user: User) => {
+          // Student型の場合のプロパティ
+          const isStudent = (user: User): user is Student => user.role === 'student';
+          // Mentor型の場合のプロパティ
+          const isMentor = (user: User): user is Mentor => user.role === 'mentor';
+
+        return (
+          <tr key={user.id}>
                 <td className="border border-gray-300 px-4 py-2 text-xs">{user.name}</td>
                 <td className="border border-gray-300 px-4 py-2 text-xs">{user.role === 'mentor' ? '卒業生' : '在校生'}</td>
                 <td className="border border-gray-300 px-4 py-2 text-xs">{user.email}</td>
@@ -86,29 +160,51 @@ function App() {
                 <td className="border border-gray-300 px-4 py-2 text-xs">{user.phone}</td>
                 <td className="border border-gray-300 px-4 py-2 text-xs">{user.hobbies.join(', ')}</td>
                 <td className="border border-gray-300 px-4 py-2 text-xs"><a href={user.url} target="_blank" rel="noopener noreferrer">Link</a></td>
-                {activeTab !== 'student' && (
+              {isStudent(user) && (
+              <>
+                {/* 生徒固有のデータ */}
+                {activeTab === 'all' && (
                   <>
-                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.experienceDays}</td>
-                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.useLangs}</td>
-                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableStartCode}</td>
-                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableEndCode}</td>
-                  {/* 対応可能な生徒<*/}
-                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableEndCode}</td> 
-                </>
+                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                  </>
                 )}
-                {activeTab !== 'mentor' && (
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.studyMinutes}</td>
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.taskCode}</td>
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.studyLangs.join(', ')}</td>
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.score}</td>
+                {/* 対応可能なメンターは未実装 */}
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.studyMinutes}</td>
+              </>
+            )}
+            {isMentor(user) && (              
+              <>
+                {/* メンター固有のデータ */}
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.experienceDays}</td>
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.useLangs.join(', ')}</td>
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableStartCode}</td>
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableEndCode}</td>
+                {/* 対応可能な生徒は未実装 */}
+                <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableEndCode}</td>
+                {activeTab === 'all' && (
                   <>
-                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.studyMinutes}</td>
-                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.taskCode}</td>
-                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.studyLangs}</td>
-                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.score}</td>
-                  {/* 対応可能なメンター */}
-                  <td className="border border-gray-300 px-4 py-2 text-xs">{user.score}</td> 
-                </>
+                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                    <td className="border border-gray-300 px-4 py-2 text-xs"></td>
+                  </>
                 )}
-              </tr>
-            ))}
-          </tbody>
+              </>
+            )}
+
+          </tr>
+        );
+      })}
+    </tbody>
         </table>
       </div>
     </div>
