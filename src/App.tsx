@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import './App.css';
 
 function App() {
@@ -13,9 +13,6 @@ function App() {
     { id: 7, name: "鈴木七郎", role: "student", email: "test7@happiness.com", age: 24, postCode: "300-0008", phone: "0120000007", hobbies: ["筋トレ", "ダーツ"], url: "https://ggg.com", studyMinutes: 26900, taskCode: 401, studyLangs: ["PHP", "Rails"], score: 73 },
     { id: 8, name: "鈴木八郎", role: "mentor", email: "test8@happiness.com", age: 33, postCode: "100-0009", phone: "0120000008", hobbies: ["ランニング", "旅行"], url: "https://hhh.com", experienceDays: 6000, useLangs: ["Golang", "Rails"], availableStartCode: 301, availableEndCode: 505 },
   ]
-
-  type ActiveTabType = 'all' | 'student' | 'mentor';
-  const [activeTab, setActiveTab] = useState<ActiveTabType>('all');
   interface User {
     id: number;
     name: string;
@@ -44,10 +41,29 @@ function App() {
     availableEndCode: number;
   }
 
-  const filteredUsers: User[] = USER_LIST.filter(user => {
-    if (activeTab === 'all') return true;
-    return user.role === activeTab;
-  });
+  type ActiveTabType = 'all' | 'student' | 'mentor';
+  const [filteredUsers, setFilteredUsers] = useState<User[]>(USER_LIST);
+  const [activeTab, setActiveTab] = useState<ActiveTabType>('all');
+
+  // activeTabが変更されたときにfilteredUsersを更新する
+  useEffect(() => {
+    const newFilteredUsers = USER_LIST.filter(user => {
+      if (activeTab === 'all') return true;
+      return user.role === activeTab;
+    });
+
+    setFilteredUsers(newFilteredUsers);
+  }, [activeTab]);
+
+
+  function sortByStudyMinutes() {
+    const sortedStudents: User[] = USER_LIST
+      .filter((user): user is Student => user.role === 'student')
+      .sort((a, b) => a.studyMinutes - b.studyMinutes);
+  
+    // 状態の更新
+    setFilteredUsers(sortedStudents);
+  }
 
   function findAvailableMentors(student: Student): Mentor[] {
     const availableMentors: Mentor[] = [];
@@ -66,8 +82,7 @@ function App() {
 
   function findAvailableStudents(mentors: Mentor): Student[] {
     const availableStudents: Student[] = [];
-    const isStudent = (user: User): user is Student => user.role === 'student';
-  
+    const isStudent = (user: User): user is Student => user.role === 'student'; 
     USER_LIST.forEach((user: User) => {
       if (isStudent(user)) {
         if (mentors.availableStartCode <= user.taskCode && mentors.availableEndCode >= user.taskCode) {
@@ -78,12 +93,6 @@ function App() {
   
     return availableStudents;
   }  
-
-  // const [sortedUsers, setSortedUsers] = useState<Student[]>(sortByStudyMinutes(USER_LIST));
-  // function sortByStudyMinutes(students : Student[]) :  Student[]{
-  //   return students.slice().sort((a, b) => a.studyMinutes - b.studyMinutes);
-  // }
-
   return (
     <div className="App bg-gray-100 p-5">
       <div className="container mx-auto bg-white shadow-lg rounded-lg overflow-hidden p-5">
@@ -148,7 +157,9 @@ function App() {
                     </div>
                     {activeTab === 'student' && (
                     <div>
-                      <i className="bi bi-sort-up"></i>
+                      <i className="bi bi-sort-up"
+                      onClick={() => sortByStudyMinutes()}
+                      ></i>
                       <i className="bi bi-sort-down-alt"></i>
                     </div>
                     )}
@@ -206,7 +217,6 @@ function App() {
                       <td className="border border-gray-300 px-4 py-2 text-xs">{user.taskCode}</td>
                       <td className="border border-gray-300 px-4 py-2 text-xs">{user.studyLangs.join(', ')}</td>
                       <td className="border border-gray-300 px-4 py-2 text-xs">{user.score}</td>
-                      {/* 対応可能なメンター */}
                       <td className="border border-gray-300 px-4 py-2 text-xs">
                         {findAvailableMentors(user).map(mentor => mentor.name).join(', ')}
                       </td>
@@ -219,7 +229,6 @@ function App() {
                       <td className="border border-gray-300 px-4 py-2 text-xs">{user.useLangs.join(', ')}</td>
                       <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableStartCode}</td>
                       <td className="border border-gray-300 px-4 py-2 text-xs">{user.availableEndCode}</td>
-                      {/* 対応可能な生徒は未実装 */}
                       <td className="border border-gray-300 px-4 py-2 text-xs">
                         {findAvailableStudents(user).map(student => student.name).join(', ')}
                       </td>
