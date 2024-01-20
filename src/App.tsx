@@ -1,9 +1,9 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState,useEffect, useMemo } from 'react';
 import './App.css';
 
 function App() {
 
-  const USER_LIST : (Student | Mentor)[]= [
+  const USER_LIST : (Student | Mentor)[]= useMemo(() =>{return[
     { id: 1, name: "鈴木太郎", role: "student", email: "test1@happiness.com", age: 26, postCode: "100-0003", phone: "0120000001", hobbies: ["旅行", "食べ歩き", "サーフィン"], url: "https://aaa.com", studyMinutes: 3000, taskCode: 101, studyLangs: ["Rails", "Javascript"], score: 68 },
     { id: 2, name: "鈴木二郎", role: "mentor", email: "test2@happiness.com", age: 31, postCode: "100-0005", phone: "0120000002", hobbies: ["サッカー", "ランニング", "筋トレ"], url: "https://bbb.com", experienceDays: 1850, useLangs: ["Next.js", "GoLang"], availableStartCode: 201, availableEndCode: 302 },
     { id: 3, name: "鈴木三郎", role: "student", email: "test3@happiness.com", age: 23, postCode: "300-0332", phone: "0120000003", hobbies: ["アニメ", "ゲーム", "旅行"], url: "https://ccc.com", studyMinutes: 125000, taskCode: 204, studyLangs: ["Rails", "Next.js"], score: 90 },
@@ -12,7 +12,8 @@ function App() {
     { id: 6, name: "鈴木六郎", role: "mentor", email: "test6@happiness.com", age: 28, postCode: "100-0007", phone: "0120000006", hobbies: ["ゲーム", "サッカー"], url: "https://fff.com", experienceDays: 260, useLangs: ["PHP", "Javascript"], availableStartCode: 101, availableEndCode: 302 },
     { id: 7, name: "鈴木七郎", role: "student", email: "test7@happiness.com", age: 24, postCode: "300-0008", phone: "0120000007", hobbies: ["筋トレ", "ダーツ"], url: "https://ggg.com", studyMinutes: 26900, taskCode: 401, studyLangs: ["PHP", "Rails"], score: 73 },
     { id: 8, name: "鈴木八郎", role: "mentor", email: "test8@happiness.com", age: 33, postCode: "100-0009", phone: "0120000008", hobbies: ["ランニング", "旅行"], url: "https://hhh.com", experienceDays: 6000, useLangs: ["Golang", "Rails"], availableStartCode: 301, availableEndCode: 505 },
-  ]
+  ]}, [])
+
   interface User {
     id: number;
     name: string;
@@ -53,17 +54,39 @@ function App() {
     });
 
     setFilteredUsers(newFilteredUsers);
-  }, [activeTab]);
+  }, [USER_LIST, activeTab]);
 
+  type sortType = 'asc' | 'desc';
+  type sortKeysStudent = 'studyMinutes' | 'score';
+  type sortKeysMentor = 'experienceDays';
 
-  function sortByStudyMinutes() {
-    const sortedStudents: User[] = USER_LIST
+  const [sortKeyStudent, setSortKeyStudent] = useState<sortKeysStudent>('studyMinutes');
+  const [sortKeyMentor, setSortKeyMentor] = useState<sortKeysMentor>('experienceDays');
+  const [sortOrder, setSortOrder] = useState<sortType>('asc');
+
+  useEffect(() => {
+    const sortedStudents = USER_LIST
       .filter((user): user is Student => user.role === 'student')
-      .sort((a, b) => a.studyMinutes - b.studyMinutes);
-  
-    // 状態の更新
+      .sort((a, b) => {
+        const valueA = sortKeyStudent === 'studyMinutes' ? a.studyMinutes : a.score;
+        const valueB = sortKeyStudent === 'studyMinutes' ? b.studyMinutes : b.score;
+        return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
+      });
+
     setFilteredUsers(sortedStudents);
-  }
+  }, [sortKeyStudent, sortOrder, USER_LIST]);
+
+  useEffect(() => {
+    const sortedMentors = USER_LIST
+      .filter((user): user is Mentor => user.role === 'mentor')
+      .sort((a, b) => {
+        const valueA = sortKeyMentor === 'experienceDays' ? a.experienceDays : a.experienceDays;
+        const valueB = sortKeyMentor === 'experienceDays' ? b.experienceDays : b.experienceDays;
+        return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
+      });
+
+    setFilteredUsers(sortedMentors);
+  }, [sortKeyMentor, sortOrder, USER_LIST]);  
 
   function findAvailableMentors(student: Student): Mentor[] {
     const availableMentors: Mentor[] = [];
@@ -136,8 +159,18 @@ function App() {
                     </div>
                     {activeTab === 'mentor' && (
                     <div>
-                      <i className="bi bi-sort-up"></i>
-                      <i className="bi bi-sort-down-alt"></i>
+                      <i className="bi bi-sort-up"
+                        onClick={() => {
+                          setSortKeyMentor('experienceDays');
+                          setSortOrder('desc');
+                        }}
+                      ></i>
+                      <i className="bi bi-sort-down-alt"
+                        onClick={() => {
+                          setSortKeyMentor('experienceDays');
+                          setSortOrder('asc');
+                        }}
+                      ></i>
                     </div>
                     )}               
                   </div>
@@ -158,9 +191,17 @@ function App() {
                     {activeTab === 'student' && (
                     <div>
                       <i className="bi bi-sort-up"
-                      onClick={() => sortByStudyMinutes()}
+                        onClick={() => {
+                          setSortKeyStudent('studyMinutes');
+                          setSortOrder('desc');
+                        }}
                       ></i>
-                      <i className="bi bi-sort-down-alt"></i>
+                      <i className="bi bi-sort-down-alt"
+                        onClick={() => {
+                          setSortKeyStudent('studyMinutes');
+                          setSortOrder('asc');
+                        }}
+                      ></i>
                     </div>
                     )}
                   </div>
@@ -174,8 +215,18 @@ function App() {
                     </div>
                     {activeTab === 'student' && (
                     <div>
-                      <i className="bi bi-sort-up"></i>
-                      <i className="bi bi-sort-down-alt"></i>
+                      <i className="bi bi-sort-up"
+                        onClick={() => {
+                          setSortKeyStudent('score');
+                          setSortOrder('desc');
+                        }}
+                      ></i>
+                      <i className="bi bi-sort-down-alt"
+                        onClick={() => {
+                          setSortKeyStudent('score');
+                          setSortOrder('asc');
+                        }}
+                      ></i>
                     </div>
                     )}               
                   </div>
