@@ -3,7 +3,7 @@ import { useRecoilState } from "recoil";
 import { studentsState, mentorsState } from './state/atoms';
 import From  from "./new";
 
-interface User {
+export interface User {
   id: number;
   name: string;
   role: 'student' | 'mentor';

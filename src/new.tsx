@@ -1,4 +1,21 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { User , Student , Mentor } from './App';
+import { useRecoilState } from "recoil";
+import { studentsState, mentorsState } from './state/atoms';
+
+interface FormData extends User {
+  // 生徒固有のプロパティ
+  studyMinutes?: Student['studyMinutes'];
+  taskCode?: Student['taskCode'];
+  studyLangs?: Student['studyLangs'];
+  score?: Student['score'];
+  // メンター固有のプロパティ
+  experienceDays?: Mentor['experienceDays'];
+  useLangs?: Mentor['useLangs'];
+  availableStartCode?: Mentor['availableStartCode'];
+  availableEndCode?: Mentor['availableEndCode'];
+}
 
 type FormProps = {
   isFormOpen: boolean;
@@ -7,8 +24,51 @@ type FormProps = {
 
 export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
 
+  const [students, setStudents] = useRecoilState(studentsState);
+  const [mentors, setMentors] = useRecoilState(mentorsState);
+
   type ActiveTabTypeForForm = 'student' | 'mentor';
   const [activeTabForForm, setActiveTabForForm] = useState<ActiveTabTypeForForm>('student');
+
+  const onSubmit = (data : FormData) => {
+    if (activeTabForForm === 'student') {
+      const newStudent: Student = {
+        id: 9,
+        name: data.name,
+        role: 'student',
+        email: data.email,
+        age: data.age,
+        postCode: data.postCode,
+        phone: data.phone,
+        hobbies: [],
+        url: '', 
+        studyMinutes: data.studyMinutes ?? 0,
+        taskCode: data.taskCode ?? 0,
+        studyLangs: []?? [],
+        score: data.score ?? 0,
+      };
+      setStudents([...students, newStudent]);
+    }else{
+      const newStudent: Mentor = {
+        id: 9,
+        name: data.name,
+        role: 'mentor',
+        email: data.email,
+        age: data.age, 
+        postCode: data.postCode,
+        phone: data.phone,
+        hobbies: [],
+        url: '',    
+        experienceDays: data.experienceDays ?? 0,
+        useLangs: [] ?? [],
+        availableStartCode: data.availableEndCode ?? 0,
+        availableEndCode: data.availableEndCode ?? 0,
+      }
+      setMentors([...mentors, newStudent]);
+    }
+  };
+
+  const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
 
   return (
     <details>
@@ -30,30 +90,32 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
             メンター
           </button>
         </div>
-        <form className="w-10/12 mx-auto md:max-w-md">
+        <form  onSubmit={handleSubmit(onSubmit)} className="w-10/12 mx-auto md:max-w-md">
           <div className="mb-8">
               <label htmlFor="name" className="text-sm block">名前</label>
-              <input type="text" id="name" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="田中 太郎"/>
+              <input type="text" {...register('name', { required: true })} id="name" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="田中 太郎"/>
+              {errors.name && <span className='text-red-500'>このフィールドは必須です</span>}
           </div>
           <div className="mb-8">
               <label htmlFor="email" className="text-sm block">Eメール</label>
-              <input type="email" id="email" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="student@example.com"/>
+              <input type="email"  {...register('email')} className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="student@example.com"/>
+          
           </div>
           <div className="mb-8">
               <label htmlFor="age" className="text-sm block">年齢</label>
-              <input type="number" id="age" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="0~"/>
+              <input type="number" {...register('age')}  id="age" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="0~"/>
           </div>
           <div className="mb-8">
               <label htmlFor="postCode" className="text-sm block">郵便番号</label>
-              <input type="number" id="postCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="810-0000"/>
+              <input type="number" {...register('postCode')}  id="postCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="810-0000"/>
           </div>
           <div className="mb-8">
               <label htmlFor="phone" className="text-sm block">電話番号</label>
-              <input type="number" id="phone" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="090-0000-0000"/>
+              <input type="number"  {...register('phone')}  id="phone" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="090-0000-0000"/>
           </div>
           <div className="mb-8">
               <label htmlFor="hobbies" className="text-sm block">趣味</label>
-              <input type="text" id="hobbies" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="趣味"/>
+              <input type="text" {...register('hobbies')} id="hobbies" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="趣味"/>
           </div>
           {activeTabForForm === 'student' && (
             <>
@@ -63,15 +125,15 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
               </div>
               <div className="mb-8">
                   <label htmlFor="taskCode" className="text-sm block">課題番号</label>
-                  <input type="number" id="taskCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="500"/>
+                  <input type="number" {...register('taskCode')}  id="taskCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="500"/>
               </div>
               <div className="mb-8">
                   <label htmlFor="studyLangs" className="text-sm block">勉強中の言語</label>
-                  <input type="text" id="studyLangs" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="Java,Go,PHP"/>
+                  <input type="text"  {...register('studyLangs')}  id="studyLangs" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="Java,Go,PHP"/>
               </div>
               <div className="mb-8">
                   <label htmlFor="score" className="text-sm block">ハピネススコア</label>
-                  <input type="number" id="score" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="700"/>
+                  <input type="number" {...register('score')} id="score" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="700"/>
               </div>        
             </>
           )}
@@ -79,22 +141,25 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
             <>
               <div className="mb-8">
                   <label htmlFor="experienceDays" className="text-sm block">実務経験月数</label>
-                  <input type="number" id="experienceDays" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="経験月数"/>
+                  <input type="number" {...register('experienceDays')} id="experienceDays" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="経験月数"/>
               </div>
               <div className="mb-8">
                   <label htmlFor="useLangs" className="text-sm block">使用言語</label>
-                  <input type="text" id="useLangs" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="Python, Java, Ruby"/>
+                  <input type="text" {...register('useLangs')}  id="useLangs" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="Python, Java, Ruby"/>
               </div>
               <div className="mb-8">
                   <label htmlFor="availableStartCode" className="text-sm block">担当できる課題番号 (開始)</label>
-                  <input type="number" id="availableStartCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="100"/>
+                  <input type="number" {...register('availableStartCode')}  id="availableStartCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="100"/>
               </div>
               <div className="mb-8">
                   <label htmlFor="availableEndCode" className="text-sm block">担当できる課題番号 (終了)</label>
-                  <input type="number" id="availableEndCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="200"/>
+                  <input type="number" {...register('availableEndCode')}  id="availableEndCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="200"/>
               </div>
             </>
           )}
+          <div className='flex flex-row-reverse'>
+            <button type="submit" className="bg-blue-500 text-white px-3">保存</button>
+          </div>
       </form>
     </div>
   </details>
