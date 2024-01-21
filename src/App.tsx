@@ -95,8 +95,8 @@ function App() {
         valueA = a[sortKeyStudent];
         valueB = b[sortKeyStudent];
       } else {
-        valueA = a.id;
-        valueB = b.id;
+        valueB = a.id;
+        valueA = b.id;
       }
       return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
     });

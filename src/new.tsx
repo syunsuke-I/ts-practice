@@ -4,15 +4,24 @@ import { User , Student , Mentor } from './App';
 import { useRecoilState } from "recoil";
 import { studentsState, mentorsState } from './state/atoms';
 
-interface FormData extends User {
+interface FormData{
+  id: User['id'];
+  name: User['name'];
+  role: 'student' | 'mentor';
+  email: User['email'];
+  age: User['age'];
+  postCode: User['postCode'];
+  phone: User['phone'];
+  hobbies: string;
+  url: string;
   // 生徒固有のプロパティ
   studyMinutes?: Student['studyMinutes'];
   taskCode?: Student['taskCode'];
-  studyLangs?: Student['studyLangs'];
+  studyLangs?: string;
   score?: Student['score'];
   // メンター固有のプロパティ
   experienceDays?: Mentor['experienceDays'];
-  useLangs?: Mentor['useLangs'];
+  useLangs?: string;
   availableStartCode?: Mentor['availableStartCode'];
   availableEndCode?: Mentor['availableEndCode'];
 }
@@ -36,36 +45,37 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
   const [activeTabForForm, setActiveTabForForm] = useState<ActiveTabTypeForForm>('student');
 
   const onSubmit = (data : FormData) => {
+    let id :number = students.length + mentors.length + 2;
     if (activeTabForForm === 'student') {
       const newStudent: Student = {
-        id: 9,
+        id: id,
         name: data.name,
         role: 'student',
         email: data.email,
         age: data.age,
         postCode: data.postCode,
         phone: data.phone,
-        hobbies: [],
+        hobbies: data.hobbies.split(',').map((hobby : string )=> hobby.trim()),
         url: '', 
         studyMinutes: data.studyMinutes ?? 0,
         taskCode: data.taskCode ?? 0,
-        studyLangs: []?? [],
+        studyLangs: data.studyLangs?.split(',').map((lang : string )=> lang.trim()) ?? [],
         score: data.score ?? 0,
       };
       setStudents([...students, newStudent]);
     }else{
       const newStudent: Mentor = {
-        id: 9,
+        id: id,
         name: data.name,
         role: 'mentor',
         email: data.email,
         age: data.age, 
         postCode: data.postCode,
         phone: data.phone,
-        hobbies: [],
+        hobbies: data.hobbies.split(',').map((hobby : string )=> hobby.trim()),
         url: '',    
         experienceDays: data.experienceDays ?? 0,
-        useLangs: [] ?? [],
+        useLangs: data.useLangs?.split(',').map((lang : string )=> lang.trim()) ?? [],
         availableStartCode: data.availableEndCode ?? 0,
         availableEndCode: data.availableEndCode ?? 0,
       }
@@ -113,11 +123,11 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
           </div>
           <div className="mb-8">
               <label htmlFor="postCode" className="text-sm block">郵便番号</label>
-              <input type="number" {...register('postCode')}  id="postCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="810-0000"/>
+              <input type="text" {...register('postCode')}  id="postCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="810-0000"/>
           </div>
           <div className="mb-8">
               <label htmlFor="phone" className="text-sm block">電話番号</label>
-              <input type="number"  {...register('phone')}  id="phone" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="090-0000-0000"/>
+              <input type="text"  {...register('phone')}  id="phone" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="090-0000-0000"/>
           </div>
           <div className="mb-8">
               <label htmlFor="hobbies" className="text-sm block">趣味</label>
