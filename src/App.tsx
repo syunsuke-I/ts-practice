@@ -64,17 +64,6 @@ function App() {
   const [isFormOpen, setOpenForm] = useState(true);
   const [activeTab, setActiveTab] = useState<ActiveTabType>('all');
 
-  const displayUsers = useMemo(() => {
-    switch (activeTab) {
-      case 'student':
-        return students;
-      case 'mentor':
-        return mentors;
-      default:
-        return [...students, ...mentors];
-    }
-  }, [activeTab, students, mentors]);
-
   type sortType = 'asc' | 'desc';
   type sortKeysStudent = 'studyMinutes' | 'score';
   type sortKeysMentor = 'experienceDays';
@@ -83,30 +72,36 @@ function App() {
   const [sortKeyMentor, setSortKeyMentor] = useState<sortKeysMentor>('experienceDays');
   const [sortOrder, setSortOrder] = useState<sortType>('asc');
 
-  useEffect(() => {
-    const sortedStudents = [...students]
-      .filter((user): user is Student => user.role === 'student')
-      .sort((a, b) => {
-        const valueA = a[sortKeyStudent];
-        const valueB = b[sortKeyStudent]; 
-        return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
-      });
+  const displayUsers = useMemo(() => {
+    let sortedData;
+    switch (activeTab) {
+      case 'student':
+        sortedData = [...students];
+        break;
+      case 'mentor':
+        sortedData = [...mentors];
+        break;
+      default:
+        sortedData = [...students, ...mentors];
+        break;
+    }
   
-    setStudents(sortedStudents);
-  }, [sortKeyStudent, sortOrder]);
-
-  useEffect(() => {
-    const sortedMentors : Mentor[]= [...mentors]
-      .filter((user): user is Mentor => user.role === 'mentor')
-      .sort((a, b) => {
-        const valueA = a[sortKeyMentor];
-        const valueB = b[sortKeyMentor]; 
-        return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
-      });
-
-      setMentors(sortedMentors);
-    }, [sortKeyMentor, sortOrder]);
-
+    return sortedData.sort((a, b) => {
+      let valueA, valueB;
+      if (activeTab === 'mentor' && a.role === 'mentor' && b.role === 'mentor') {
+        valueA = a[sortKeyMentor];
+        valueB = b[sortKeyMentor];
+      } else if (activeTab === 'student' && a.role === 'student' && b.role === 'student') {
+        valueA = a[sortKeyStudent];
+        valueB = b[sortKeyStudent];
+      } else {
+        valueA = a.id;
+        valueB = b.id;
+      }
+      return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
+    });
+  }, [activeTab, students, mentors, sortKeyStudent, sortKeyMentor, sortOrder]);
+  
   function findAvailableMentors(student: Student): Mentor[] {
     const availableMentors: Mentor[] = [];
   
