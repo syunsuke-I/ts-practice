@@ -5,6 +5,7 @@ import { useRecoilState } from "recoil";
 import { studentsState, mentorsState } from './state/atoms';
 
 interface FormData{
+  // 共通のプロパティ
   id: User['id'];
   name: User['name'];
   role: 'student' | 'mentor';
@@ -31,24 +32,31 @@ type FormProps = {
   setOpenForm: (open: boolean) => void;
 };
 
+type ActiveTabTypeForForm = 'student' | 'mentor';
+
 export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
 
+  const [activeTabForForm, setActiveTabForForm] = useState<ActiveTabTypeForForm>('student');
+
+  const [students, setStudents] = useRecoilState(studentsState);
+  const [mentors, setMentors] = useRecoilState(mentorsState);
+
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>(); // react hook form で状態管理
+
+  // 新規登録の開閉状態の操作
   const handleToggle = (event: React.MouseEvent<HTMLMapElement, MouseEvent>) => {
     event.preventDefault();
     setOpenForm(!isFormOpen);
   };
 
-  const [students, setStudents] = useRecoilState(studentsState);
-  const [mentors, setMentors] = useRecoilState(mentorsState);
-
-  type ActiveTabTypeForForm = 'student' | 'mentor';
-  const [activeTabForForm, setActiveTabForForm] = useState<ActiveTabTypeForForm>('student');
+  function getNewId(): number{
+    return students.length + mentors.length + 1;
+  }
 
   const onSubmit = (data : FormData) => {
-    let id :number = students.length + mentors.length + 2;
     if (activeTabForForm === 'student') {
       const newStudent: Student = {
-        id: id,
+        id: getNewId(),
         name: data.name,
         role: 'student',
         email: data.email,
@@ -65,7 +73,7 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
       setStudents([...students, newStudent]);
     }else{
       const newStudent: Mentor = {
-        id: id,
+        id: getNewId(),
         name: data.name,
         role: 'mentor',
         email: data.email,
@@ -84,8 +92,6 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
     setOpenForm(!isFormOpen);
     reset();
   };
-
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>();
 
   return (
     <details open={isFormOpen}>

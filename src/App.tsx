@@ -31,7 +31,24 @@ export interface Mentor extends User {
   availableEndCode: number;
 }
 
+type ActiveTabType = 'all' | 'student' | 'mentor'; // TABの状態
+type sortType = 'asc' | 'desc'; // ソートの降順昇順 
+type sortKeysStudent = 'studyMinutes' | 'score'; // 生徒のソートキー
+type sortKeysMentor = 'experienceDays'; // メンターのソートキー
+
 function App() {
+
+  const [isFormOpen, setOpenForm] = useState(false); // 新規登録のフォームの開閉の状態の管理(Recoilで管理しないパターンの練習)
+  const [activeTab, setActiveTab] = useState<ActiveTabType>('all'); // TABの状態管理
+  const [sortKeyStudent, setSortKeyStudent] = useState<sortKeysStudent>('studyMinutes'); // 生徒のソートキーの状態管理
+  const [sortKeyMentor, setSortKeyMentor] = useState<sortKeysMentor>('experienceDays'); // メンターのソートキーの状態管理
+  const [sortOrder, setSortOrder] = useState<sortType>('asc'); // ソートの降順昇順の状態管理
+
+  const [students, setStudents] = useRecoilState(studentsState); // 生徒の状態管理(Recoilで管理)
+  const [mentors, setMentors] = useRecoilState(mentorsState); // メンターの状態管理(Recoilで管理)
+
+  const isStudent = (user: User): user is Student => user.role === 'student';
+  const isMentor = (user: User): user is Mentor => user.role === 'mentor';
 
   const USER_LIST : (Student | Mentor)[] = [
     { id: 1, name: "鈴木太郎", role: "student", email: "test1@happiness.com", age: 26, postCode: "100-0003", phone: "0120000001", hobbies: ["旅行", "食べ歩き", "サーフィン"], url: "https://aaa.com", studyMinutes: 3000, taskCode: 101, studyLangs: ["Rails", "Javascript"], score: 68 },
@@ -44,12 +61,7 @@ function App() {
     { id: 8, name: "鈴木八郎", role: "mentor", email: "test8@happiness.com", age: 33, postCode: "100-0009", phone: "0120000008", hobbies: ["ランニング", "旅行"], url: "https://hhh.com", experienceDays: 6000, useLangs: ["Golang", "Rails"], availableStartCode: 301, availableEndCode: 505 },
   ];
 
-  const [students, setStudents] = useRecoilState(studentsState);
-  const [mentors, setMentors] = useRecoilState(mentorsState);
-
-  const isStudent = (user: User): user is Student => user.role === 'student';
-  const isMentor = (user: User): user is Mentor => user.role === 'mentor';
-
+  // 生徒とメンターを分けて表示する
   useEffect(() => {
     const studentData: Student[] = USER_LIST.filter(isStudent);
     const mentorData: Mentor[] = USER_LIST.filter(isMentor);
@@ -58,20 +70,7 @@ function App() {
     setMentors(mentorData);
   }, []);
 
-
-  type ActiveTabType = 'all' | 'student' | 'mentor';
-  
-  const [isFormOpen, setOpenForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<ActiveTabType>('all');
-
-  type sortType = 'asc' | 'desc';
-  type sortKeysStudent = 'studyMinutes' | 'score';
-  type sortKeysMentor = 'experienceDays';
-
-  const [sortKeyStudent, setSortKeyStudent] = useState<sortKeysStudent>('studyMinutes');
-  const [sortKeyMentor, setSortKeyMentor] = useState<sortKeysMentor>('experienceDays');
-  const [sortOrder, setSortOrder] = useState<sortType>('asc');
-
+  // タブの切り替えやソートによるユーザを制御する
   const displayUsers = useMemo(() => {
     let sortedData;
     switch (activeTab) {
@@ -95,13 +94,21 @@ function App() {
         valueA = a[sortKeyStudent];
         valueB = b[sortKeyStudent];
       } else {
+        // 新規追加が一番上に来るように
         valueB = a.id;
         valueA = b.id;
       }
       return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
     });
   }, [activeTab, students, mentors, sortKeyStudent, sortKeyMentor, sortOrder]);
-  
+ 
+  /**
+   * 特定の生徒に対応可能なメンターのリストを返す関数。
+   * 生徒が担当できる課題番号の範囲内にあるメンターを抽出する。
+   *
+   * @param {Student} student - 対象の生徒オブジェクト。
+   * @returns {Mentor[]} 対応可能なメンターの配列。
+   */
   function findAvailableMentors(student: Student): Mentor[] {
     const availableMentors: Mentor[] = [];
   
@@ -116,6 +123,13 @@ function App() {
     return availableMentors;
   }
 
+  /**
+   * 特定のメンターが対応可能な生徒のリストを返す関数。
+   * メンターが担当できる課題番号の範囲内にある生徒を抽出する。
+   *
+   * @param {Mentor}  mentors - 対象のメンターオブジェクト。
+   * @returns {Student[]} 対応可能な生徒の配列。
+   */
   function findAvailableStudents(mentors: Mentor): Student[] {
     const availableStudents: Student[] = [];
     USER_LIST.forEach((user: User) => {
@@ -270,6 +284,7 @@ function App() {
                       <>
                         {/* 生徒固有のデータ */}
                         {activeTab === 'all' && (
+                          // ダミーカラム
                           <>
                             <td className="border border-gray-300 px-4 py-2 text-xs"></td>
                             <td className="border border-gray-300 px-4 py-2 text-xs"></td>
@@ -298,6 +313,7 @@ function App() {
                           {findAvailableStudents(user).map(student => student.name).join(', ')}
                         </td>
                         {activeTab === 'all' && (
+                          // ダミーカラム
                           <>
                             <td className="border border-gray-300 px-4 py-2 text-xs"></td>
                             <td className="border border-gray-300 px-4 py-2 text-xs"></td>
