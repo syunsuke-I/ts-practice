@@ -53,6 +53,7 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
     return students.length + mentors.length + 1;
   }
 
+  // 共通項目の保存処理
   function createUserCommonFields(data: FormData): Omit<User, 'role'> {
     return {
       id: getNewId(),
