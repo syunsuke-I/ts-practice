@@ -24,6 +24,11 @@ type FormProps = {
 
 export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
 
+  const handleToggle = (event: React.MouseEvent<HTMLMapElement, MouseEvent>) => {
+    event.preventDefault();
+    setOpenForm(!isFormOpen);
+  };
+
   const [students, setStudents] = useRecoilState(studentsState);
   const [mentors, setMentors] = useRecoilState(mentorsState);
 
@@ -66,15 +71,16 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
       }
       setMentors([...mentors, newStudent]);
     }
+    setOpenForm(!isFormOpen);
   };
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
 
   return (
-    <details>
-      <summary onClick={() => setOpenForm(!isFormOpen)}>
-      新規登録
-    </summary>
+    <details open={isFormOpen}>
+      <summary onClick={handleToggle}>
+        新規登録
+      </summary>
       <div className="mt-10 md-10">
         <div className="flex mb-4">
           <button

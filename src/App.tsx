@@ -61,7 +61,7 @@ function App() {
 
   type ActiveTabType = 'all' | 'student' | 'mentor';
   
-  const [isFormOpen, setOpenForm] = useState(true);
+  const [isFormOpen, setOpenForm] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTabType>('all');
 
   type sortType = 'asc' | 'desc';
@@ -134,7 +134,7 @@ function App() {
         isFormOpen ={isFormOpen}
         setOpenForm={setOpenForm}
       />
-      {isFormOpen && (
+      {!isFormOpen && (
         <>
           <div className="container mx-auto bg-white shadow-lg rounded-lg overflow-hidden p-5 mt-5">
           <div className="flex mb-4">
