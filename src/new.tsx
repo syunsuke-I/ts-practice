@@ -82,9 +82,10 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
       setMentors([...mentors, newStudent]);
     }
     setOpenForm(!isFormOpen);
+    reset();
   };
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>();
 
   return (
     <details open={isFormOpen}>
@@ -114,42 +115,50 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
           </div>
           <div className="mb-8">
               <label htmlFor="email" className="text-sm block">Eメール</label>
-              <input type="email"  {...register('email')} className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="student@example.com"/>
-          
+              <input type="email"  {...register('email', { required: true })} className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="student@example.com"/>
+              {errors.email && <span className='text-red-500'>このフィールドは必須です</span>}
           </div>
           <div className="mb-8">
               <label htmlFor="age" className="text-sm block">年齢</label>
-              <input type="number" {...register('age')}  id="age" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="0~"/>
+              <input type="number" {...register('age', { required: true })}  id="age" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="0~"/>
+              {errors.age && <span className='text-red-500'>このフィールドは必須です</span>}
           </div>
           <div className="mb-8">
               <label htmlFor="postCode" className="text-sm block">郵便番号</label>
-              <input type="text" {...register('postCode')}  id="postCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="810-0000"/>
+              <input type="text" {...register('postCode', { required: true })}  id="postCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="810-0000"/>
+              {errors.postCode && <span className='text-red-500'>このフィールドは必須です</span>}
           </div>
           <div className="mb-8">
               <label htmlFor="phone" className="text-sm block">電話番号</label>
-              <input type="text"  {...register('phone')}  id="phone" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="090-0000-0000"/>
+              <input type="text"  {...register('phone', { required: true })}  id="phone" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="090-0000-0000"/>
+              {errors.phone && <span className='text-red-500'>このフィールドは必須です</span>}
           </div>
           <div className="mb-8">
               <label htmlFor="hobbies" className="text-sm block">趣味</label>
-              <input type="text" {...register('hobbies')} id="hobbies" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="趣味"/>
+              <input type="text" {...register('hobbies', { required: true })} id="hobbies" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="サッカー,テニス,相撲"/>
+              {errors.hobbies && <span className='text-red-500'>このフィールドは必須です</span>}
           </div>
           {activeTabForForm === 'student' && (
             <>
               <div className="mb-8">
                 <label htmlFor="studyMinutes" className="text-sm block">勉強時間 (分)</label>
-                <input type="number" id="studyMinutes" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="0~"/>
+                <input type="number"   {...register('studyMinutes', { required: true })}  id="studyMinutes" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="0~"/>
+                {errors.studyMinutes && <span className='text-red-500'>このフィールドは必須です</span>}
               </div>
               <div className="mb-8">
                   <label htmlFor="taskCode" className="text-sm block">課題番号</label>
-                  <input type="number" {...register('taskCode')}  id="taskCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="500"/>
+                  <input type="number" {...register('taskCode', { required: true })}  id="taskCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="500"/>
+                  {errors.taskCode && <span className='text-red-500'>このフィールドは必須です</span>}
               </div>
               <div className="mb-8">
                   <label htmlFor="studyLangs" className="text-sm block">勉強中の言語</label>
-                  <input type="text"  {...register('studyLangs')}  id="studyLangs" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="Java,Go,PHP"/>
+                  <input type="text"  {...register('studyLangs', { required: true })}  id="studyLangs" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="Java,Go,PHP"/>
+                  {errors.studyLangs && <span className='text-red-500'>このフィールドは必須です</span>}
               </div>
               <div className="mb-8">
                   <label htmlFor="score" className="text-sm block">ハピネススコア</label>
-                  <input type="number" {...register('score')} id="score" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="700"/>
+                  <input type="number" {...register('score', { required: true })} id="score" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="700"/>
+                  {errors.score && <span className='text-red-500'>このフィールドは必須です</span>}
               </div>        
             </>
           )}
@@ -157,19 +166,23 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
             <>
               <div className="mb-8">
                   <label htmlFor="experienceDays" className="text-sm block">実務経験月数</label>
-                  <input type="number" {...register('experienceDays')} id="experienceDays" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="経験月数"/>
+                  <input type="number" {...register('experienceDays', { required: true })} id="experienceDays" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="経験月数"/>
+                  {errors.experienceDays && <span className='text-red-500'>このフィールドは必須です</span>}
               </div>
               <div className="mb-8">
                   <label htmlFor="useLangs" className="text-sm block">使用言語</label>
-                  <input type="text" {...register('useLangs')}  id="useLangs" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="Python, Java, Ruby"/>
+                  <input type="text" {...register('useLangs', { required: true })}  id="useLangs" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="Python, Java, Ruby"/>
+                  {errors.useLangs && <span className='text-red-500'>このフィールドは必須です</span>}
               </div>
               <div className="mb-8">
                   <label htmlFor="availableStartCode" className="text-sm block">担当できる課題番号 (開始)</label>
-                  <input type="number" {...register('availableStartCode')}  id="availableStartCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="100"/>
+                  <input type="number" {...register('availableStartCode', { required: true })}  id="availableStartCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="100"/>
+                  {errors.availableStartCode && <span className='text-red-500'>このフィールドは必須です</span>}
               </div>
               <div className="mb-8">
                   <label htmlFor="availableEndCode" className="text-sm block">担当できる課題番号 (終了)</label>
-                  <input type="number" {...register('availableEndCode')}  id="availableEndCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="200"/>
+                  <input type="number" {...register('availableEndCode', { required: true })}  id="availableEndCode" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="200"/>
+                  {errors.availableEndCode && <span className='text-red-500'>このフィールドは必須です</span>}
               </div>
             </>
           )}
