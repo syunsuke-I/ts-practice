@@ -13,16 +13,16 @@ interface FormData{
   age: User['age'];
   postCode: User['postCode'];
   phone: User['phone'];
-  hobbies: string;
+  hobbies: string; // フォームからは文字列 関数内で配列にする
   url: string;
   // 生徒固有のプロパティ
   studyMinutes?: Student['studyMinutes'];
   taskCode?: Student['taskCode'];
-  studyLangs?: string;
+  studyLangs?: string; // フォームからは文字列 関数内で配列にする
   score?: Student['score'];
   // メンター固有のプロパティ
   experienceDays?: Mentor['experienceDays'];
-  useLangs?: string;
+  useLangs?: string; // フォームからは文字列 関数内で配列にする
   availableStartCode?: Mentor['availableStartCode'];
   availableEndCode?: Mentor['availableEndCode'];
 }
@@ -53,41 +53,41 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
     return students.length + mentors.length + 1;
   }
 
-  const onSubmit = (data : FormData) => {
+  function createUserCommonFields(data: FormData): Omit<User, 'role'> {
+    return {
+      id: getNewId(),
+      name: data.name,
+      email: data.email,
+      age: data.age,
+      postCode: data.postCode,
+      phone: data.phone,
+      hobbies: data.hobbies.split(',').map(hobby => hobby.trim()),
+      url: data.url
+    };
+  }
+
+  const onSubmit = (data: FormData) => {
+    const commonFields : Omit<User, 'role'> = createUserCommonFields(data);
     if (activeTabForForm === 'student') {
       const newStudent: Student = {
-        id: getNewId(),
-        name: data.name,
+        ...commonFields,
         role: 'student',
-        email: data.email,
-        age: data.age,
-        postCode: data.postCode,
-        phone: data.phone,
-        hobbies: data.hobbies.split(',').map((hobby : string )=> hobby.trim()),
-        url: '', 
         studyMinutes: data.studyMinutes ?? 0,
         taskCode: data.taskCode ?? 0,
-        studyLangs: data.studyLangs?.split(',').map((lang : string )=> lang.trim()) ?? [],
+        studyLangs: data.studyLangs?.split(',').map(lang => lang.trim()) ?? [],
         score: data.score ?? 0,
       };
       setStudents([...students, newStudent]);
-    }else{
-      const newStudent: Mentor = {
-        id: getNewId(),
-        name: data.name,
+    } else {
+      const newMentor: Mentor = {
+        ...commonFields,
         role: 'mentor',
-        email: data.email,
-        age: data.age, 
-        postCode: data.postCode,
-        phone: data.phone,
-        hobbies: data.hobbies.split(',').map((hobby : string )=> hobby.trim()),
-        url: '',    
         experienceDays: data.experienceDays ?? 0,
-        useLangs: data.useLangs?.split(',').map((lang : string )=> lang.trim()) ?? [],
-        availableStartCode: data.availableEndCode ?? 0,
+        useLangs: data.useLangs?.split(',').map(lang => lang.trim()) ?? [],
+        availableStartCode: data.availableStartCode ?? 0,
         availableEndCode: data.availableEndCode ?? 0,
       }
-      setMentors([...mentors, newStudent]);
+      setMentors([...mentors, newMentor]);
     }
     setOpenForm(!isFormOpen);
     reset();
@@ -143,6 +143,11 @@ export const Form: React.FC<FormProps> = ({ isFormOpen, setOpenForm }) => {
               <label htmlFor="hobbies" className="text-sm block">趣味</label>
               <input type="text" {...register('hobbies', { required: true })} id="hobbies" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="サッカー,テニス,相撲"/>
               {errors.hobbies && <span className='text-red-500'>このフィールドは必須です</span>}
+          </div>
+          <div className="mb-8">
+              <label htmlFor="hobbies" className="text-sm block">URL</label>
+              <input type="text" {...register('url', { required: true })} id="hobbies" className="w-full py-2 border-b focus:outline-none focus:border-b-2 focus:border-indigo-500 placeholder-gray-500 placeholder-opacity-50" placeholder="https://..."/>
+              {errors.url && <span className='text-red-500'>このフィールドは必須です</span>}
           </div>
           {activeTabForForm === 'student' && (
             <>
