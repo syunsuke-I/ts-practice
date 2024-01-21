@@ -14,6 +14,20 @@ function App() {
     { id: 8, name: "鈴木八郎", role: "mentor", email: "test8@happiness.com", age: 33, postCode: "100-0009", phone: "0120000008", hobbies: ["ランニング", "旅行"], url: "https://hhh.com", experienceDays: 6000, useLangs: ["Golang", "Rails"], availableStartCode: 301, availableEndCode: 505 },
   ]}, [])
 
+  const [students, setStudents] = useState<Student[]>([]);
+  const [mentors, setMentors] = useState<Mentor[]>([]);
+
+  const isStudent = (user: User): user is Student => user.role === 'student';
+  const isMentor = (user: User): user is Mentor => user.role === 'mentor';
+
+  useEffect(() => {
+    const studentData: Student[] = USER_LIST.filter(isStudent);
+    const mentorData: Mentor[] = USER_LIST.filter(isMentor);
+
+    setStudents(studentData);
+    setMentors(mentorData);
+  }, [USER_LIST, isMentor, isStudent]);
+
   interface User {
     id: number;
     name: string;
@@ -42,23 +56,21 @@ function App() {
     availableEndCode: number;
   }
 
-  const isStudent = (user: User): user is Student => user.role === 'student';
-  const isMentor = (user: User): user is Mentor => user.role === 'mentor';
-
   type ActiveTabType = 'all' | 'student' | 'mentor';
-
+  
   const [isFormOpen, setOpenForm] = useState(true);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>(USER_LIST);
   const [activeTab, setActiveTab] = useState<ActiveTabType>('all');
 
-  useEffect(() => {
-    const newFilteredUsers = USER_LIST.filter(user => {
-      if (activeTab === 'all') return true;
-      return user.role === activeTab;
-    });
-
-    setFilteredUsers(newFilteredUsers);
-  }, [USER_LIST, activeTab]);
+  const displayUsers = useMemo(() => {
+    switch (activeTab) {
+      case 'student':
+        return students;
+      case 'mentor':
+        return mentors;
+      default:
+        return [...students, ...mentors];
+    }
+  }, [activeTab, students, mentors]);
 
   type sortType = 'asc' | 'desc';
   type sortKeysStudent = 'studyMinutes' | 'score';
@@ -69,28 +81,28 @@ function App() {
   const [sortOrder, setSortOrder] = useState<sortType>('asc');
 
   useEffect(() => {
-    const sortedStudents = USER_LIST
+    const sortedStudents = [...students]
       .filter((user): user is Student => user.role === 'student')
       .sort((a, b) => {
-        const valueA = sortKeyStudent === 'studyMinutes' ? a.studyMinutes : a.score;
-        const valueB = sortKeyStudent === 'studyMinutes' ? b.studyMinutes : b.score;
+        const valueA = a[sortKeyStudent];
+        const valueB = b[sortKeyStudent]; 
         return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
       });
-
-    setFilteredUsers(sortedStudents);
-  }, [sortKeyStudent, sortOrder, USER_LIST]);
+  
+    setStudents(sortedStudents);
+  }, [sortKeyStudent, sortOrder, USER_LIST,students]);
 
   useEffect(() => {
-    const sortedMentors = USER_LIST
+    const sortedMentors : Mentor[]= [...mentors]
       .filter((user): user is Mentor => user.role === 'mentor')
       .sort((a, b) => {
-        const valueA = sortKeyMentor === 'experienceDays' ? a.experienceDays : a.experienceDays;
-        const valueB = sortKeyMentor === 'experienceDays' ? b.experienceDays : b.experienceDays;
+        const valueA = a[sortKeyMentor];
+        const valueB = b[sortKeyMentor]; 
         return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
       });
 
-    setFilteredUsers(sortedMentors);
-  }, [sortKeyMentor, sortOrder, USER_LIST]); 
+      setMentors(sortedMentors);
+  }, [sortKeyMentor, sortOrder, USER_LIST,mentors]);
 
   function findAvailableMentors(student: Student): Mentor[] {
     const availableMentors: Mentor[] = [];
@@ -121,10 +133,10 @@ function App() {
   return (
     <div className="App bg-gray-100 p-5">
       <From
-         isFormOpen ={isFormOpen}
-         setOpenForm={setOpenForm}
+        isFormOpen ={isFormOpen}
+        setOpenForm={setOpenForm}
       />
-      {!isFormOpen && (
+      {isFormOpen && (
         <>
           <div className="container mx-auto bg-white shadow-lg rounded-lg overflow-hidden p-5 mt-5">
           <div className="flex mb-4">
@@ -245,7 +257,7 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user: User) => {
+              {displayUsers.map((user: User) => {
                 return (
                   <tr key={user.id}>
                         <td className="border border-gray-300 px-4 py-2 text-xs">{user.name}</td>
